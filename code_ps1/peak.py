@@ -1,20 +1,20 @@
 import trace
 
 ################################################################################
-########################### Class for Peak Problems ############################
+########################### Peak问题的类 ############################
 ################################################################################
 
 class PeakProblem(object):
     """
-    A class representing an instance of a peak-finding problem.
+    表示峰值查找问题的实例的类。
     """
 
     def __init__(self, array, bounds):
         """
-        A method for initializing an instance of the PeakProblem class.
-        Takes an array and an argument indicating which rows to include.
+        初始化PeakProblem类的实例的方法。
+        接受一个数组和一个指示要包含哪些行的参数。
 
-        RUNTIME: O(1)
+        运行时间：O(1)
         """
 
         (startRow, startCol, numRow, numCol) = bounds
@@ -28,10 +28,9 @@ class PeakProblem(object):
 
     def get(self, location):
         """
-        Returns the value of the array at the given location, offset by
-        the coordinates (startRow, startCol).
+        返回给定位置在数组中的值，偏移坐标为(startRow, startCol)。
 
-        RUNTIME: O(1)
+        运行时间：O(1)
         """
 
         (r, c) = location
@@ -43,10 +42,9 @@ class PeakProblem(object):
 
     def getBetterNeighbor(self, location, trace = None):
         """
-        If (r, c) has a better neighbor, return the neighbor.  Otherwise,
-        return the location (r, c).
+        如果(r, c)有一个更好的邻居，则返回邻居。否则，返回位置(r, c)。
 
-        RUNTIME: O(1)
+        运行时间：O(1)
         """
 
         (r, c) = location
@@ -67,9 +65,9 @@ class PeakProblem(object):
     
     def getMaximum(self, locations, trace = None):
         """
-        Finds the location in the current problem with the greatest value.
+        在当前问题中找到具有最大值的位置。
 
-        RUNTIME: O(len(locations))
+        运行时间：O(len(locations))
         """
    
         (bestLoc, bestVal) = (None, 0)
@@ -84,87 +82,80 @@ class PeakProblem(object):
 
     def isPeak(self, location):
         """
-        Returns true if the given location is a peak in the current subproblem.
+        如果给定位置是当前子问题中的峰值，则返回True。
 
-        RUNTIME: O(1)
+        运行时间：O(1)
         """
 
         return (self.getBetterNeighbor(location) == location)
 
     def getSubproblem(self, bounds):
         """
-        Returns a subproblem with the given bounds.  The bounds is a quadruple
-        of numbers: (starting row, starting column, # of rows, # of columns).
+        返回具有给定边界的子问题。边界是一个四元组数字：(起始行，起始列，行数，列数)。
 
-        RUNTIME: O(1)
+        运行时间：O(1)
         """
 
         (sRow, sCol, nRow, nCol) = bounds
         newBounds = (self.startRow + sRow, self.startCol + sCol, nRow, nCol)
         return PeakProblem(self.array, newBounds)
 
-    def getSubproblemContaining(self, boundList, location):
+        def getSubproblemContaining(self, boundList, location):
+            """
+            返回包含给定位置的子问题。在boundList中选择满足约束条件的第一个子问题，
+            然后使用getSubproblem()构造子问题。
+
+            运行时间：O(len(boundList))
+            """
+
+            (row, col) = location
+            for (sRow, sCol, nRow, nCol) in boundList:
+                if sRow <= row and row < sRow + nRow:
+                    if sCol <= col and col < sCol + nCol:
+                        return self.getSubproblem((sRow, sCol, nRow, nCol))
+
+            # 不应该到达这里
+            return self
+
+        def getLocationInSelf(self, problem, location):
+            """
+            将给定问题中的位置重新映射到调用此函数的问题中的相同位置。
+
+            运行时间：O(1)
+            """
+
+            (row, col) = location
+            newRow = row + problem.startRow - self.startRow
+            newCol = col + problem.startCol - self.startCol
+            return (newRow, newCol)
+
+    ################################################################################
+    ################################ 辅助方法 ################################
+    ################################################################################
+
+    def getDimensions(array):
         """
-        Returns the subproblem containing the given location.  Picks the first
-        of the subproblems in the list which satisfies that constraint, and
-        then constructs the subproblem using getSubproblem().
+        获取二维数组的维度。第一维是列表中的项数；第二维是最短行的长度。
+        这确保了任何小于结果边界的位置(row, col)实际上都映射到数组中的有效位置。
 
-        RUNTIME: O(len(boundList))
+        运行时间：O(len(array))
         """
 
-        (row, col) = location
-        for (sRow, sCol, nRow, nCol) in boundList:
-            if sRow <= row and row < sRow + nRow:
-                if sCol <= col and col < sCol + nCol:
-                    return self.getSubproblem((sRow, sCol, nRow, nCol))
+        rows = len(array)
+        cols = 0
+        
+        for row in array:
+            if len(row) > cols:
+                cols = len(row)
+        
+        return (rows, cols)
 
-        # shouldn't reach here
-        return self
-
-    def getLocationInSelf(self, problem, location):
+    def createProblem(array):
         """
-        Remaps the location in the given problem to the same location in
-        the problem that this function is being called from.
+        使用从数组中使用getDimensions函数派生的边界，构造PeakProblem对象的实例。
 
-        RUNTIME: O(1)
+        运行时间：O(len(array))
         """
 
-        (row, col) = location
-        newRow = row + problem.startRow - self.startRow
-        newCol = col + problem.startCol - self.startCol
-        return (newRow, newCol)
-
-################################################################################
-################################ Helper Methods ################################
-################################################################################
-
-def getDimensions(array):
-    """
-    Gets the dimensions for a two-dimensional array.  The first dimension
-    is simply the number of items in the list; the second dimension is the
-    length of the shortest row.  This ensures that any location (row, col)
-    that is less than the resulting bounds will in fact map to a valid
-    location in the array.
-
-    RUNTIME: O(len(array))
-    """
-
-    rows = len(array)
-    cols = 0
-    
-    for row in array:
-        if len(row) > cols:
-            cols = len(row)
-    
-    return (rows, cols)
-
-def createProblem(array):
-    """
-    Constructs an instance of the PeakProblem object for the given array,
-    using bounds derived from the array using the getDimensions function.
-   
-    RUNTIME: O(len(array))
-    """
-
-    (rows, cols) = getDimensions(array)
-    return PeakProblem(array, (0, 0, rows, cols))
+        (rows, cols) = getDimensions(array)
+        return PeakProblem(array, (0, 0, rows, cols))
