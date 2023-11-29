@@ -100,34 +100,34 @@ class PeakProblem(object):
         newBounds = (self.startRow + sRow, self.startCol + sCol, nRow, nCol)
         return PeakProblem(self.array, newBounds)
 
-        def getSubproblemContaining(self, boundList, location):
-            """
-            返回包含给定位置的子问题。在boundList中选择满足约束条件的第一个子问题，
-            然后使用getSubproblem()构造子问题。
+    def getSubproblemContaining(self, boundList, location):
+        """
+        返回包含给定位置的子问题。在boundList中选择满足约束条件的第一个子问题，
+        然后使用getSubproblem()构造子问题。
 
-            运行时间：O(len(boundList))
-            """
+        运行时间：O(len(boundList))
+        """
 
-            (row, col) = location
-            for (sRow, sCol, nRow, nCol) in boundList:
-                if sRow <= row and row < sRow + nRow:
-                    if sCol <= col and col < sCol + nCol:
-                        return self.getSubproblem((sRow, sCol, nRow, nCol))
+        (row, col) = location
+        for (sRow, sCol, nRow, nCol) in boundList:
+            if sRow <= row and row < sRow + nRow:
+                if sCol <= col and col < sCol + nCol:
+                    return self.getSubproblem((sRow, sCol, nRow, nCol))
 
-            # 不应该到达这里
-            return self
+        # 不应该到达这里
+        return self
 
-        def getLocationInSelf(self, problem, location):
-            """
-            将给定问题中的位置重新映射到调用此函数的问题中的相同位置。
+    def getLocationInSelf(self, problem, location):
+        """
+        将给定问题中的位置重新映射到调用此函数的问题中的相同位置。
 
-            运行时间：O(1)
-            """
+        运行时间：O(1)
+        """
 
-            (row, col) = location
-            newRow = row + problem.startRow - self.startRow
-            newCol = col + problem.startCol - self.startCol
-            return (newRow, newCol)
+        (row, col) = location
+        newRow = row + problem.startRow - self.startRow
+        newCol = col + problem.startCol - self.startCol
+        return (newRow, newCol)
 
     ################################################################################
     ################################ 辅助方法 ################################
